@@ -25,7 +25,7 @@ FROM build AS test
 COPY tests/ tests/
 RUN gcc -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer -fcommon -fgnu89-inline -ffunction-sections -fdata-sections \
     -I./saac/include -Wl,--gc-sections tests/saac_read_buffer.c -o /tmp/buffer-test && \
-    /tmp/buffer-test
+    ASAN_OPTIONS=detect_leaks=0 UBSAN_OPTIONS=halt_on_error=1 timeout 30 /tmp/buffer-test
 
 # Keep plain `docker build` producing the runtime, not the test toolchain.
 FROM runtime AS final

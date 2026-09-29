@@ -73,6 +73,18 @@ server listens on `9065` and connects to `127.0.0.1:9300`.
 The account server continues listening even when database connection fails,
 so an open TCP port is **not** proof that login works.
 
+### Observed startup result
+
+A brief smoke test reached both listening ports. A subsequent 20-second test
+running both services with the bundled configuration did **not** stay healthy:
+the account server terminated with signal 11 after accepting the game-server
+connection, and the game server exited after losing its account-server link.
+The game process had reached NPC/signal and map-warp initialization, including
+2,981 warp points. Logs also report a failed database connection and missing
+`char_sleep` directories. The crash's root cause is not established; configuring
+the database alone must not be assumed to fix it. Debug this handshake crash
+before calling the setup runnable for gameplay.
+
 ## Why use Linux instead of a native Mac build?
 
 The stock game-server build fails with Apple Clang because the legacy

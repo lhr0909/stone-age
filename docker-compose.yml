@@ -1,0 +1,67 @@
+name: stoneage25
+services:
+  db:
+    image: mariadb:10.11
+    environment:
+      MARIADB_ROOT_PASSWORD: local-root-only
+      MARIADB_DATABASE: stoneage
+      MARIADB_USER: stoneage
+      MARIADB_PASSWORD: localdb
+    volumes:
+      - database:/var/lib/mysql
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/01-stoneage.sql:ro
+    healthcheck:
+      test: [CMD, healthcheck.sh, --connect, --innodb_initialized]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+  saac:
+    build:
+      context: .
+      target: runtime
+    image: stoneage25-server:local
+    platform: linux/386
+    command: [saac]
+    environment:
+      DB_HOST: db
+      DB_USER: stoneage
+      DB_PASSWORD: localdb
+      DB_NAME: stoneage
+      ACCOUNT_PASSWORD: local-game
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - accounts:/state
+    healthcheck:
+      test: [CMD, python3, /opt/stoneage/healthcheck.py, saac]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    stop_grace_period: 30s
+  gmsv:
+    image: stoneage25-server:local
+    platform: linux/386
+    command: [gmsv]
+    environment:
+      ACCOUNT_HOST: saac
+      ACCOUNT_PASSWORD: local-game
+    depends_on:
+      saac:
+        condition: service_healthy
+    ports:
+      - '127.0.0.1:9065:9065'
+    volumes:
+      - game:/state
+      - accounts:/accounts
+    healthcheck:
+      test: [CMD, python3, /opt/stoneage/healthcheck.py, gmsv]
+      interval: 5s
+      timeout: 3s
+      retries: 24
+      start_period: 30s
+    stop_grace_period: 30s
+volumes:
+  database:
+  accounts:
+  game:

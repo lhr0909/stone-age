@@ -1,0 +1,14 @@
+.git
+**/*.o
+**/*.a
+**/*.exe
+**/*.zip
+**/*.bak
+**/nohup.out
+saac/char
+saac/mail
+saac/log
+saac/db
+saac/debug
+saac/linux*
+gmsv/log

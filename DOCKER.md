@@ -23,7 +23,8 @@ assumptions that have not been ported to 64 bits.
 
 The native macOS protocol probe built from the newer client's VER25 codec can
 authenticate, list characters, create a character, enter the world, save/logout,
-and reconnect. This is a server/protocol test, **not a playable graphical Mac
+and reconnect. A complete Compose down/up preserved the saved character file
+byte-for-byte, followed by a successful re-login. This is a server/protocol test, **not a playable graphical Mac
 client**. See the client fork's `native/README.md` for its current porting status.
 
 Startup fixes address an account read-buffer access at index -1, an oversized
@@ -61,7 +62,9 @@ docker build --platform linux/386 --target test -t stoneage25-server:test .
 ```
 
 This runs the actual account-server buffer routines with address/undefined
-behavior sanitizers. The default Docker build produces the runtime image; Compose
+behavior sanitizers. LeakSanitizer tracing is disabled because it hangs under the
+i386 emulation used on this Mac; address and undefined-behavior checks remain
+enabled. The default Docker build produces the runtime image; Compose
 explicitly selects the runtime stage. Compiler warnings are retained, and the
 executables retain debug symbols. The runtime image contains no compiler.
 

@@ -1217,32 +1217,18 @@ void save_fm_pk_list()
 #endif
 
 #ifdef _ALLDOMAN // Syu ADD ≈≈––∞ÒNPC
-void LOAD_herolist()
+void LOAD_herolist(void)
 {
-	FILE *fdb;
-	int i, linenum=0;
-	
-	char filename[256], token[512];
-
-	snprintf( filename , sizeof( filename ) ,"%s/%s" ,	"db/herolist","db_herolist.txt");
-	if( !( fdb = fopen ( filename , "r+" ) ) ) {
-		log("\nSyu log open db_herolist.txt error!!");
-		return ; 
-	}else {
-		char *addr;
-		fread ( &token , sizeof ( token ) , 1 , fdb ) ;
-		fclose ( fdb ) ; 
-		do {
-			for ( i = 0 ; i < MAX_HERO_COLUMN ; i ++ ) {
-				easyGetTokenFromBuf( token , "|", i + 1 , Herolist[ linenum ][ i ] , sizeof( Herolist[ linenum ][ i ] ) );
-			}
-			linenum ++;
-			if ( (addr = strstr ( token , "\n" )) ) 
-					strcpy ( token , addr + 1 ) ;
-			else 
-				break;
-		} while ( 1 ) ;
-	}
+    FILE *fp = fopen("db/herolist/db_herolist.txt", "r");
+    char line[512];
+    int row = 0, col;
+    if (!fp) return;
+    while (row < MAX_HERO_LIST && fgets(line, sizeof(line), fp)) {
+        for (col = 0; col < MAX_HERO_COLUMN; ++col)
+            easyGetTokenFromBuf(line, "|", col + 1, Herolist[row][col], sizeof(Herolist[row][col]));
+        ++row;
+    }
+    fclose(fp);
 }
 
 void SAVE_herolist (int fd)

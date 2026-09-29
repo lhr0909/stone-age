@@ -110,18 +110,18 @@ static int readConfig(char *path)
 			return 0;
 		}
 	}
+    fclose(fp);
+    return -1;
 }
 
 BOOL sasql_init(void)
 {
-	if (mysql_init(&mysql) == NULL & readConfig("acserv.cf")) {
+	if (readConfig("acserv.cf") != 0 || mysql_init(&mysql) == NULL) {
 		printf("\nmysql_init=fail  ˝æ›ø‚≥ı ºªØ ß∞‹£°");
 		exit(1);
 		return FALSE;
 	}
-	printf("ip=%s id=%s ps=%s database=%s port=%d",
-	       config.sql_IP, config.sql_ID, config.sql_PS, config.sql_DataBase,
-	       config.sql_Port);
+	printf("SQL host=%s database=%s port=%d\n", config.sql_IP, config.sql_DataBase, config.sql_Port);
 
 	if (!mysql_real_connect(&mysql, config.sql_IP, config.sql_ID,	//’ ∫≈
 				config.sql_PS,	//√‹¬Î

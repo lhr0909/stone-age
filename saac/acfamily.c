@@ -975,7 +975,11 @@ int readFMPoint(char *dir)
    	         break;
    	      chop(line);
    	      easyGetTokenFromBuf(line, "|", 1, data, sizeof(data));
-   	      fmpoint[i].fl = atoi(data);
+          if (i >= MAX_FMPOINT) {
+          log("Ignoring manor records beyond MAX_FMPOINT=%d\n", MAX_FMPOINT);
+          break;
+      }
+      fmpoint[i].fl = atoi(data);
    	      easyGetTokenFromBuf(line, "|", 2, data, sizeof(data));
    	      fmpoint[i].x = atoi(data);
    	      easyGetTokenFromBuf(line, "|", 3, data, sizeof(data));

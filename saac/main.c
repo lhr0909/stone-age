@@ -438,7 +438,7 @@ int main( int argc , char **argv )
     }
 
 #ifdef _SASQL
-    sasql_init();
+    if (!sasql_init()) { log("Database initialization failed\n"); return 1; }
 #endif	
     log( "¶ÁÈ¡Êý¾ÝÄ¿Â¼\n" );
     dbRead( dbdir );
@@ -897,6 +897,7 @@ int tcpstruct_readline( int ti , char *buf , int len , int kend , int kend_r )
         return TCPSTRUCT_EINVCIND;
 
     l = getLineReadBuffer( ti , buf , len );
+    if (l < 0) return l;
     if( l == 0 ){
         if( con[ti].closed_by_remote ){
             return TCPSTRUCT_EREADFIN;
@@ -914,7 +915,7 @@ int tcpstruct_readline( int ti , char *buf , int len , int kend , int kend_r )
         if( buf[l-1]=='\r' ){
             buf[l-1] = 0; minus = -1;
         }
-        if( buf[l-2]=='\r' ){
+        if( l >= 2 && buf[l-2]=='\r' ){
             buf[l-2] = 0; minus = -2;
         }
     }
@@ -1095,8 +1096,9 @@ static int getLineReadBuffer( int index , char *buf, int len )
 
     for(;;){
         int i;        
-        int l = mb[top].len;
-        if( top == -1 )break;
+        int l;
+        if (top == -1) break;
+        l = mb[top].len;
         for( i=0 ; i < l ; i++){
             if( mb[top].buf[i] == '\n' ){
                 breakflag = 1;
@@ -1107,7 +1109,7 @@ static int getLineReadBuffer( int index , char *buf, int len )
         if( breakflag )break;
         top = mb[top].next;
     }
-    if( ti > len ){
+    if( ti >= len ){
         /* 1µæ»¥Ø¦»¥ÔÊ¿ºÔÂ£Û    Ø¦¾Þ·Â¡õÃ«¾®ÒüÁù */
         return TCPSTRUCT_ETOOLONG;
     }
